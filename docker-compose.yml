@@ -1,0 +1,25 @@
+
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    container_name: task-managment-api  # optional: name your container
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
