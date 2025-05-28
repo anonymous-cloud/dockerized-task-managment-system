@@ -1,22 +1,30 @@
 const express = require("express");
 const router = express.Router();
 
-var {createNewTask,getAllTasks,updateTask,deleteTask} = require("../controllers/taskController")
+const multer = require('multer');
+const { uploadFile } = require('../services/s3');
+const upload = multer({ storage: multer.memoryStorage() });
 
-const { protect } = require("../middleware/authMiddleware");
-const { allowAdminOrSelf , adminOnly } = require("../middleware/roleMiddleware");
+var {createNewTask,getAllTasks,updateTask,deleteTask,uploadAttachment} = require("../controllers/taskController")
+
+const { authJwt } = require("../middleware/authMiddleware");
+const { allowAdminOrSelf } = require("../middleware/roleMiddleware");
 
 
 // api To create new task
-router.post("/createNewTask/:userId", protect, allowAdminOrSelf, createNewTask);
+router.post("/createNewTask/:userId", authJwt, allowAdminOrSelf, createNewTask);
 
 //api to get all task if admin or If user then user task
-router.get("/getAllTasks/:userId", protect, allowAdminOrSelf, getAllTasks);
+router.get("/getAllTasks/:userId", authJwt, allowAdminOrSelf, getAllTasks);
 
 //api to update task if usertask or else admin can update 
-router.put("/updateTask/:userId", protect, allowAdminOrSelf, updateTask);
+router.put("/updateTask/:userId", authJwt, allowAdminOrSelf, updateTask);
 
 //api to delete user task if user is deleting its ouwn task or admin can delete
-router.post("/deleteTask/:userId/:_id", protect, allowAdminOrSelf, deleteTask);
+router.post("/deleteTask/:userId/:_id", authJwt, allowAdminOrSelf, deleteTask);
+
+//router to add attachment
+//api to delete user task if user is deleting its ouwn task or admin can delete
+router.post("/uploadAttachment/:userId/:_id", authJwt, allowAdminOrSelf, upload.single('file'),uploadAttachment);
 
 module.exports = router;

@@ -1,31 +1,4 @@
-// // Upload attachment to a task
-// const uploadAttachment = async (req, res) => {
-//   try {
-//     const task = await Task.findOne({
-//       _id: req.params.id,
-//       createdBy: req.user._id,
-//     });
-
-//     if (!task) {
-//       return res.status(404).json({ message: 'Task not found' });
-//     }
-
-//     if (!req.file) {
-//       return res.status(400).json({ message: 'No file uploaded' });
-//     }
-
-//     const result = await uploadToS3(req.file);
-//     task.attachments.push({
-//       key: result.Key,
-//       url: await getSignedUrl(result.Key),
-//     });
-//     await task.save();
-
-//     res.status(201).json(task);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+const { uploadFile } = require('../services/s3');
 
 const User = require("../models/User");
  const Task = require('../models/task');
@@ -145,6 +118,42 @@ const deleteTask = async (req, res) => {
 };
 
 
+//function to upload attachment using s3 
+const uploadAttachment = async (req, res) => {
+  try {
+    const { _id } = req.params; // task ID
+    const task = await Task.findById(_id);
+
+    var userIdForCheck = req.user._id
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Only allow admin or the owner of the task
+    if (req.user.role !== 'admin' && req.params.userId.toString() !== userIdForCheck.toString()) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // Construct a unique S3 key
+    const fileName = `${req.user._id}/${Date.now()}-${req.file.originalname}`;
+
+    // Upload to AWS S3
+    await uploadFile(req.file.buffer, fileName, req.file.mimetype);
+
+    res.status(200).json({ message: 'File uploaded successfully', fileKey: fileName });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+};
+
+
 
 
 
@@ -152,5 +161,6 @@ module.exports = {
   createNewTask,
   getAllTasks,
   updateTask,
-  deleteTask
+  deleteTask,
+  uploadAttachment
 };

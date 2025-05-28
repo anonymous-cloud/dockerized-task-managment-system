@@ -16,10 +16,9 @@ const taskSchema = new mongoose.Schema({
   dueDate: {
     type: Date,
   },
-  attachments: [{
-    key: String,
-    url: String,
-  }],
+   attachments: {
+    type: String
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

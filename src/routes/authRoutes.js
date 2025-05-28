@@ -4,11 +4,10 @@ const router  = express.Router();
 const { registerUser, loginUser } = require('../controllers/authController');
 
 
-// Api to register user or admin 
-// POST /api/auth/register
+// route to register user or admin 
 router.post('/register', registerUser);
 
-// POST /api/auth/login
+//route for login
 router.post('/login', loginUser);
 
 module.exports = router;

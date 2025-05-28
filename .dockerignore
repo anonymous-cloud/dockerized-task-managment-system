@@ -1,0 +1,14 @@
+# Ignore node modules
+node_modules
+npm-debug.log
+
+
+
+# Ignore OS or IDE specific files
+.DS_Store
+.vscode
+.idea
+
+# Ignore test files (optional)
+__tests__/
+coverage/
